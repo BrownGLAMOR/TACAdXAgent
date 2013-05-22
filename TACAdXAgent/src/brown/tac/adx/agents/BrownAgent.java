@@ -1,5 +1,6 @@
 package brown.tac.adx.agents;
 
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -9,6 +10,11 @@ import java.util.Random;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import brown.tac.adx.models.Model;
+import brown.tac.adx.models.Modeler;
+import brown.tac.adx.optimizationalgs.Optimizer;
+import brown.tac.adx.predictions.DailyPrediction;
 
 import se.sics.isl.transport.Transportable;
 import se.sics.tasim.aw.Agent;
@@ -22,7 +28,9 @@ import tau.tac.adx.props.AdxBidBundle;
 import tau.tac.adx.props.AdxQuery;
 import tau.tac.adx.props.PublisherCatalog;
 import tau.tac.adx.props.PublisherCatalogEntry;
+import tau.tac.adx.report.adn.AdNetworkKey;
 import tau.tac.adx.report.adn.AdNetworkReport;
+import tau.tac.adx.report.adn.AdNetworkReportEntry;
 import tau.tac.adx.report.adn.MarketSegment;
 import tau.tac.adx.report.demand.AdNetBidMessage;
 import tau.tac.adx.report.demand.AdNetworkDailyNotification;
@@ -37,7 +45,7 @@ import edu.umich.eecs.tac.props.BankStatus;
 
 /**
  * 
- * @author 
+ * @author Mariano Schain, Ethan Langavin, Betsy Hilliard, Veena Vignale, Amy Greenwald
  * 
  */
 public class BrownAgent extends Agent {
@@ -71,8 +79,8 @@ public class BrownAgent extends Agent {
 	 * The addresses of server entities to which the agent should send the daily
 	 * bids data
 	 */
-	private String demandAgentAddress;
-	private String adxAgentAddress;
+	private String demandAgentAddress; //this appears to be where bids for UCS and Campaigns are sent?
+	private String adxAgentAddress; //this appears to be where bids for impressions are sent?
 
 	/*
 	 * we maintain a list of queries - each characterized by the web site (the
@@ -105,7 +113,22 @@ public class BrownAgent extends Agent {
 	 * The targeted service level for the user classification service
 	 */
 	double ucsTargetLevel;
+	
+	/*
+	 * Container object for models
+	 */
+	Modeler _modeler;
+	
+	/*
+	 * Container Object for optimizers
+	 */
+	Optimizer _optimizer;
 
+	/*
+	 * Datastructure to hold the messages recieved on day d
+	 */
+	LinkedList<DailyInfo> _dailyInfoList;
+	
 	/*
 	 * current day of simulation
 	 */
@@ -115,6 +138,8 @@ public class BrownAgent extends Agent {
 
 	public BrownAgent() {
 		campaignReports = new LinkedList<CampaignReport>();
+		_modeler = new Modeler("");
+		_dailyInfoList = new LinkedList<DailyInfo>();
 	}
 
 	@Override
@@ -122,8 +147,14 @@ public class BrownAgent extends Agent {
 		try {
 			Transportable content = message.getContent();
 			
+			if (_dailyInfoList.get(day) == null) {
+				_dailyInfoList.set(day, new DailyInfo(day));
+			}
+			
 			//log.fine(message.getContent().getClass().toString());
 			
+			//TODO: Is there a better way to handle these messages?
+			// Ultimately they need to be passed into a DailyInfo Object that 
 			if (content instanceof InitialCampaignMessage) {
 				handleInitialCampaignMessage((InitialCampaignMessage) content);
 			} else if (content instanceof CampaignOpportunityMessage) {
@@ -258,6 +289,9 @@ public class BrownAgent extends Agent {
 		/* Note: Campaign bid is in millis */
 		AdNetBidMessage bids = new AdNetBidMessage(ucsBid, pendingCampaign.id,
 				cmpBid);
+		
+		//Message sent here
+		//TODO: This message should be sent after the optimizer makes decisions
 		sendMessage(demandAgentAddress, bids);
 	}
 
@@ -302,8 +336,9 @@ public class BrownAgent extends Agent {
 	 * to the AdX.
 	 */
 	private void handleSimulationStatus(SimulationStatus simulationStatus) {
-		log.info("Day " + day + " : Simulation Status Received");
-		sendBidAndAds();
+		DailyPrediction prediction = _modeler.updateModels(new DailyPrediction(_dailyInfoList.get(day)));
+		_optimizer.makeDecisions(prediction);
+		// Make calls to sendMessage to tell the server about our decisions
 		log.info("Day " + day + " ended. Starting next day");
 		++day;
 	}
@@ -311,11 +346,11 @@ public class BrownAgent extends Agent {
 	/**
 	 * 
 	 */
-	protected void sendBidAndAds() {
+	protected void updateBids() {
 
 		bidBundle = new AdxBidBundle();
 		int entrySum = 0;
-
+		
 		/*
 		 * 
 		 */
@@ -384,6 +419,9 @@ public class BrownAgent extends Agent {
 		}
 
 		if (bidBundle != null) {
+			//This is where the bid bundle for bids in the AdExchange for Impressions is sent to 
+			// the AdX server
+			//TODO: We should call this after the optimizer makes decisions
 			log.info("Day " + day + ": Sending BidBundle");
 			sendMessage(adxAgentAddress, bidBundle);
 		}
@@ -422,7 +460,9 @@ public class BrownAgent extends Agent {
 			AdxPublisherReportEntry entry = adxPublisherReport
 					.getEntry(publisherKey);
 			log.info(entry.toString());
+			
 		}
+		
 	}
 
 	/**
@@ -432,19 +472,20 @@ public class BrownAgent extends Agent {
 	private void handleAdNetworkReport(AdNetworkReport adnetReport) {
 		
 		log.info("Day "+ day + " : AdNetworkReport");
-		/*
+		
+		
 		 for (AdNetworkKey adnetKey : adnetReport.keys()) {
-		 
 			double rnd = Math.random();
 			if (rnd > 0.95) {
 				AdNetworkReportEntry entry = adnetReport
 						.getAdNetworkReportEntry(adnetKey);
+				
 				log.info(adnetKey + " " + entry);
 			}
 		}
-        */
+        
 	}
-
+	//Why did the TAu agent override this? DO we need to? Or should we not touch it?
 	@Override
 	protected void simulationSetup() {
 		randomGenerator = new Random();
@@ -466,6 +507,8 @@ public class BrownAgent extends Agent {
 	}
 
 	/**
+	 * NOTE: This was implemented by Mariano, Why? Should we keep it or do we want a diff. data structure?
+	 * OR does it hae to do with the bid bundle?
 	 * A user visit to a publisher's web-site results in an impression
 	 * opportunity (a query) that is characterized by the the publisher, the
 	 * market segment the user may belongs to, the device used (mobile or
