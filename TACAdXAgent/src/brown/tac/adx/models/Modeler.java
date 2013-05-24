@@ -4,7 +4,7 @@ import java.util.LinkedList;
 
 import brown.tac.adx.predictions.DailyPrediction;
 /*
- * Class contains a list of models and update them in order of dependencies
+ * Class containing a list of models and updating them in order of dependencies
  */
 public class Modeler {
 	
