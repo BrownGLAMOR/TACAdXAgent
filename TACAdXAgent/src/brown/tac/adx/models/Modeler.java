@@ -3,8 +3,10 @@ package brown.tac.adx.models;
 import java.util.LinkedList;
 
 import brown.tac.adx.predictions.DailyPrediction;
-/*
+
+/**
  * Class contains a list of models and update them in order of dependencies
+ *  @author Veena Vignale
  */
 public class Modeler {
 	
