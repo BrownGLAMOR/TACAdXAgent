@@ -6,7 +6,7 @@ import brown.tac.adx.predictions.DailyPrediction;
 
 /**
  * Class containing a list of models and updating them in order of dependencies
- *  @author Veena Vignale
+ *  @author Veena Vignale 5/24/13
  */
 public class Modeler {
 	
