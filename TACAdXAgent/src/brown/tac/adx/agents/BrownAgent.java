@@ -11,7 +11,6 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import brown.tac.adx.models.Model;
 import brown.tac.adx.models.Modeler;
 import brown.tac.adx.optimizationalgs.Optimizer;
 import brown.tac.adx.predictions.DailyPrediction;
@@ -125,7 +124,7 @@ public class BrownAgent extends Agent {
 	Optimizer _optimizer;
 
 	/*
-	 * Datastructure to hold the messages recieved on day d
+	 * Data structure to hold the messages received on day d
 	 */
 	LinkedList<DailyInfo> _dailyInfoList;
 	
@@ -474,15 +473,15 @@ public class BrownAgent extends Agent {
 		log.info("Day "+ day + " : AdNetworkReport");
 		
 		
-		 for (AdNetworkKey adnetKey : adnetReport.keys()) {
-			double rnd = Math.random();
-			if (rnd > 0.95) {
-				AdNetworkReportEntry entry = adnetReport
-						.getAdNetworkReportEntry(adnetKey);
-				
-				log.info(adnetKey + " " + entry);
-			}
-		}
+//		 for (AdNetworkKey adnetKey : adnetReport.keys()) {
+//			double rnd = Math.random();
+//			if (rnd > 0.95) {
+//				AdNetworkReportEntry entry = adnetReport
+//						.getAdNetworkReportEntry(adnetKey);
+//				
+//				log.info(adnetKey + " " + entry);
+//			}
+//		}
         
 	}
 	//Why did the TAu agent override this? DO we need to? Or should we not touch it?

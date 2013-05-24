@@ -1,6 +1,6 @@
 package brown.tac.adx.optimizationalgs;
 
-abstract class OptimizationAlg {
+public abstract class OptimizationAlg {
 	
 	abstract void makeDecision();
 	
