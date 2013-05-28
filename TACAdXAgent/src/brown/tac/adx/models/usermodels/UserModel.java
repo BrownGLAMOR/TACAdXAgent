@@ -2,7 +2,7 @@ package brown.tac.adx.models.usermodels;
 
 import brown.tac.adx.models.Model;
 
-abstract class UserModel extends Model {
+public abstract class UserModel extends Model {
 	
 	public enum UserModelType {
 		UM1, UM2, UM3, DEFAULT

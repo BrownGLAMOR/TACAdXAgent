@@ -1,5 +1,6 @@
 package brown.tac.adx.models;
 
+
 import java.util.LinkedList;
 
 //Many things to import for a DOM parser
@@ -11,6 +12,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.Element; 
 import java.io.File; 
 
+import brown.tac.adx.models.usermodels.*;
 import brown.tac.adx.predictions.DailyPrediction;
 
 /**
@@ -63,7 +65,7 @@ public class Modeler {
 						brown.tac.adx.models.usermodels.UserModel1 um1 = new brown.tac.adx.models.usermodels.UserModel1(filename);
 						_modelList.add(um1); 
 				//etc with other explicit model names found in file
-				
+						Model userModel = UserModel.build();
 					
 					}
 				}
