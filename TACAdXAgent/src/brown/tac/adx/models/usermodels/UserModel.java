@@ -7,7 +7,7 @@ abstract class UserModel extends Model {
 	public enum UserModelType {
 		UM1, UM2, UM3, DEFAULT
 	}
-	
+	 
 	public static UserModel build() {
 		return build(UserModelType.DEFAULT, "");
 	}
