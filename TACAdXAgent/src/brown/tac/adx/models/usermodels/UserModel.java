@@ -1,6 +1,7 @@
 package brown.tac.adx.models.usermodels;
 
 import brown.tac.adx.models.Model;
+import brown.tac.adx.predictions.UserModelPrediction;
 
 public abstract class UserModel extends Model {
 	
@@ -48,5 +49,10 @@ public abstract class UserModel extends Model {
 	}
 	
 	public abstract UserModelOutput getOutput();
+
+	public UserModelPrediction getPrediction() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	
 }

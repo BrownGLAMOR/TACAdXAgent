@@ -2,6 +2,7 @@ package brown.tac.adx.predictions;
 
 import brown.tac.adx.agents.DailyInfo;
 import brown.tac.adx.models.Model;
+import brown.tac.adx.models.usermodels.UserModel;
 
 public class DailyPrediction {
 	
@@ -14,7 +15,12 @@ public class DailyPrediction {
 	
 	public UserModelPrediction getUserModelPrediction() {
 		if (_userModel == null) {
-			throw new Exception("User Model Undefined");
+			try {
+				throw new Exception("User Model Undefined");
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		return _userModel.getPrediction();
 	}
